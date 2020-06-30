@@ -1,0 +1,2 @@
+class InvalidPiece(Exception):
+  pass
