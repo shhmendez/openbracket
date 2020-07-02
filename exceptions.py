@@ -1,2 +1,2 @@
-class InvalidPiece(Exception):
+class InvalidMove(Exception):
   pass

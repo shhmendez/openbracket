@@ -2,7 +2,6 @@ import sys,os
 sys.path.append(os.getcwd())
 
 import Game
-import __init__ as server
 
 def printb(board):
   for p in board:

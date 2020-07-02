@@ -44,10 +44,11 @@ def game():
   board = build_board()
   
 def move(board, x,y,dx,dy):
+  if dx == 0 and dy == 0: raise Exc.InvalidMove()
   board = copy.deepcopy(board)
   piece = board[y][x]
   if not piece:
-    raise Exc.InvalidPiece()
+    raise Exc.InvalidMove()
 
   occupy = board[y+dy][x+dx]
 
@@ -64,7 +65,9 @@ def move(board, x,y,dx,dy):
     board[y][x] = EMPTY()
     p =  ColoredPiece(piece.color, new_piece)
     board[y+dy][x+dx] = p
-  return board
+    return (board, valid_move)
+  else:
+    return (board, valid_move)
 
 
 
