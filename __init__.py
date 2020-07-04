@@ -1,8 +1,9 @@
-from clastic import Application, render_basic, render_json, Response,POST
 import sys,os
 sys.path.append(os.getcwd())
 import Game
 import exceptions as Exp
+from clastic import Application, render_basic, render_json, Response, Middleware
+from clastic.route import OPTIONS, POST
 from collections import Sized
 def Post(func):
     def inner(request):
@@ -16,13 +17,16 @@ def Post(func):
 
 board = Game.build_board()
 
-def Cors(context, request, _route):
-    res = render_basic(context,request, _route)
-    res.headers['Access-Control-Allow-Origin'] = "*"
-    res.headers['Access-Control-Allow-Headers'] = "*"
-    # print(res.headers)
-    return res
+
+class Cors(Middleware):
+    def render(self, next, context, request, _route):
+        res = render_basic(context,request, _route)
+        res.headers['Access-Control-Allow-Origin'] = "*"
+        res.headers['Access-Control-Allow-Headers'] = "*"
+        # print(res.headers)
+        return res
 def move(rank,file,xto,yto):
+    print('called')
     try:
         global board
         rank = int(rank)
@@ -39,11 +43,16 @@ def move(rank,file,xto,yto):
 def default(request):
     return "success"
 
-routes = [POST('/move', Post(move), Cors),
-        ("/test",default,Cors)
+routes = [
+        POST('/move', default),
+        ("/test",default)
         ]
 
-app = Application(routes)
+app = Application(routes,middlewares=[Cors()])
+
+
+
+
 app.serve()
 #request new game
 #validate board transition
