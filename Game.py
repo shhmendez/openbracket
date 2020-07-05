@@ -7,8 +7,8 @@ import copy
 
 class ColoredPiece(namedtuple('ColoredPiece',['color','piece'])):
   __slots__ = ()
-  WHITE = 0
-  BLACK = 1
+  WHITE = 1
+  BLACK = 0
   def __str__(self):
     n = self.piece.__name__
     if n == '__pawn__': return 'pawn'
@@ -16,6 +16,7 @@ class ColoredPiece(namedtuple('ColoredPiece',['color','piece'])):
   #temp for testing
   def __repr__(self):
     return self.__str__()
+
 
 EMPTY = lambda: 0
 
@@ -60,7 +61,7 @@ def move(board, x,y,dx,dy):
     friendly_collision = False
     collision = False
 
-  new_piece, valid_move = piece.piece(dx,dy, friendly_collision,collision)
+  new_piece, valid_move = piece.piece(dx,dy*((piece.color)*-2+1), friendly_collision,collision)
 
   if(valid_move):
     board[y][x] = EMPTY()

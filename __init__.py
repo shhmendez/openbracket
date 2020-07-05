@@ -21,12 +21,35 @@ board = Game.build_board()
 class Cors(Middleware):
     def request(self, next):
         res = next()
+        if(type(res) != Response):
+            try:
+                res = json.dumps(res)
+            except:
+                pass
+            res = Response(res)
         res.headers['Access-Control-Allow-Origin'] = "*"
         res.headers['Access-Control-Allow-Headers'] = "*"
         return res
+class OnlineGame(Middleware):
+    provides = ('session',)
+    def __init__(self,cookie_name='user_id', secret_key=None):
+        self.cookie_name = cookie_name
+        self.secret_key = secret_key or os.urandom(20)
+    def request(self,next, request):
+        session = load_cookie(request, self.cookie_name, self.secret_key)
+        response = next(session=session)
+        session.save_cookie(response, key=self.cookie_name)
+        return response
+
+class Print(Middleware):
+    def request(self,next, request):
+        res = next()
+        global board
+        for rank in board:
+            print(rank)
+        return res
 
 def move(rank,file,xto,yto):
-
     try:
         global board
         rank = int(rank)
@@ -39,17 +62,34 @@ def move(rank,file,xto,yto):
     except Exp.InvalidMove:
         context =  {'valid':False}
     finally:
-        for rank in board:
-            print(rank)
-        return Response(json.dumps(context), content_type='application/json')
+        return Response(json.dumps(context), content_type='application/json') 
+
+def newgame():
+    global board
+    board = Game.build_board()
+    return {"success":True}
+def sync():
+    places = [[],[]]
+    global board
+    for i,rank in enumerate(board):
+        for j,piece in enumerate(rank):
+            if(piece == 0):
+                continue
+            places[piece.color].append((str(piece), i, j))
+
+    return {'black': places[0], 'white':places[1]}
+
 def default(request):
     return "success"
+
 routes = [
         POST('/move', Post(move)),
+        POST("/sync",sync),
+        POST("/newgame",newgame),
         ("/<path*>",default,render_basic)
         ]
 
-app = Application(routes,middlewares=[Cors()])
+app = Application(routes,middlewares=[Cors(),Print()])
 
 
 
