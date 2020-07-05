@@ -19,30 +19,33 @@ board = Game.build_board()
 
 
 class Cors(Middleware):
-    def render(self, next, context, request, _route):
-        res = render_basic(context,request,_route)
+    def request(self, next):
+        res = next()
         res.headers['Access-Control-Allow-Origin'] = "*"
         res.headers['Access-Control-Allow-Headers'] = "*"
         return res
+
 def move(rank,file,xto,yto):
+
     try:
         global board
         rank = int(rank)
         file = int(file)
-        xto = int(xto)
-        yto = int(yto)
-        board,valid = Game.move(board, rank,file, xto-rank, yto-file)
-        return valid
+        dx = int(xto) - rank
+        dy = int(yto) - file
+        print(rank,file,dx, dy)
+        board,valid = Game.move(board, rank,file, dx, dy)
+        context = {'valid':valid}
     except Exp.InvalidMove:
-        return False
+        context =  {'valid':False}
     finally:
         for rank in board:
             print(rank)
-
+        return Response(json.dumps(context), content_type='application/json')
 def default(request):
     return "success"
 routes = [
-        POST('/move', Post(move), render_basic),
+        POST('/move', Post(move)),
         ("/<path*>",default,render_basic)
         ]
 

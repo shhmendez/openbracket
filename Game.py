@@ -47,6 +47,7 @@ def move(board, x,y,dx,dy):
   if dx == 0 and dy == 0: raise Exc.InvalidMove()
   board = copy.deepcopy(board)
   piece = board[y][x]
+  print(piece)
   if not piece:
     raise Exc.InvalidMove()
 
