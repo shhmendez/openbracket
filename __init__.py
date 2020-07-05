@@ -1,6 +1,7 @@
 import sys,os
 sys.path.append(os.getcwd())
 import Game
+import json
 import exceptions as Exp
 from clastic import Application, render_basic, render_json, Response, Middleware
 from clastic.route import OPTIONS, POST
@@ -9,10 +10,9 @@ def Post(func):
     def inner(request):
         # args = func.__code__.co_varnames[func.__code__]
         # print(args)
-        # kwargs = {k: request.values[k] for k in args}
-        print(request.values)
-        print(request.headers)
-        return func(**request.values)
+        # kwargs = {k: request.values[k] for k in args} 
+        data = json.loads(request.data.decode("utf-8"))
+        return func(**data)
     return inner
 
 board = Game.build_board()
@@ -20,13 +20,11 @@ board = Game.build_board()
 
 class Cors(Middleware):
     def render(self, next, context, request, _route):
-        res = render_basic(context,request, _route)
+        res = render_basic(context,request,_route)
         res.headers['Access-Control-Allow-Origin'] = "*"
         res.headers['Access-Control-Allow-Headers'] = "*"
-        # print(res.headers)
         return res
 def move(rank,file,xto,yto):
-    print('called')
     try:
         global board
         rank = int(rank)
@@ -34,18 +32,18 @@ def move(rank,file,xto,yto):
         xto = int(xto)
         yto = int(yto)
         board,valid = Game.move(board, rank,file, xto-rank, yto-file)
-        for rank in board:
-            print(rank)
         return valid
     except Exp.InvalidMove:
         return False
+    finally:
+        for rank in board:
+            print(rank)
 
 def default(request):
     return "success"
-
 routes = [
-        POST('/move', default),
-        ("/test",default)
+        POST('/move', Post(move), render_basic),
+        ("/<path*>",default,render_basic)
         ]
 
 app = Application(routes,middlewares=[Cors()])
