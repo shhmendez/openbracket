@@ -6,6 +6,18 @@ import exceptions as Exp
 from clastic import Application, render_basic, render_json, Response, Middleware
 from clastic.route import OPTIONS, POST
 from collections import Sized
+
+
+
+class Print(Middleware):
+    def request(self,next, request):
+        res = next()
+        global board
+        # for rank in board:
+        #     print(rank)
+        return res
+
+
 def Post(func):
     def inner(request):
         # args = func.__code__.co_varnames[func.__code__]
@@ -41,13 +53,6 @@ class OnlineGame(Middleware):
         session.save_cookie(response, key=self.cookie_name)
         return response
 
-class Print(Middleware):
-    def request(self,next, request):
-        res = next()
-        global board
-        for rank in board:
-            print(rank)
-        return res
 
 def move(rank,file,xto,yto):
     try:
@@ -68,16 +73,16 @@ def newgame():
     global board
     board = Game.build_board()
     return {"success":True}
+
 def sync():
-    places = [[],[]]
+    places = {}
     global board
     for i,rank in enumerate(board):
         for j,piece in enumerate(rank):
             if(piece == 0):
                 continue
-            places[piece.color].append((str(piece), i, j))
-
-    return {'black': places[0], 'white':places[1]}
+            places[str((i,j))] = {'name':str(piece), 'color': piece.color}
+    return places
 
 def default(request):
     return "success"
@@ -92,9 +97,8 @@ routes = [
 app = Application(routes,middlewares=[Cors(),Print()])
 
 
-
-
-app.serve()
+if __name__ == "__main__":
+  app.serve()
 #request new game
 #validate board transition
 #request game by id

@@ -12,7 +12,7 @@ def queen(*args):
   return (queen, rook(*args)[1] or bishop(*args)[1])
 
 def king(dx,dy,friendly_collision,collision):
-  return abs(dx) >= 1 and abs(dy) >= 1 and not friendly_collision
+  return (king,abs(dx) <= 1 and abs(dy) <= 1 and not friendly_collision)
 
 def knight(dx,dy,friendly_collision,collision):
   L = sorted(map(lambda i: abs(i), [dx,dy]))

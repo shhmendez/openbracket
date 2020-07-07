@@ -33,26 +33,63 @@ def side(color):
   
   return [list(map(c,pawns)),list(map(c,royals))]
 
-  
+
 
 def build_board():
   board = side(ColoredPiece.BLACK)[::-1]
   board.extend([[EMPTY() for _ in range(8)] for _ in range(4)])
   board.extend(side((ColoredPiece.WHITE)))
   return board
-  
+
+def interpolate(x,y,x2,y2,stepSize = 1):
+  stepSize = abs(int(stepSize))
+  dx = x2 - x
+  dx = 0 if dx == 0 else int(dx/abs(dx))
+  dy = y2 - y
+  dy = 0 if dy == 0 else int(dy/abs(dy))
+  print("Step Start/End {},{}/{},{}".format(x,y,x2,y2))
+  print("Step Direction {},{}".format(dx,dy))
+
+  print("{}+{}<{}*{} == {}".format(y,dy,y2,dy, y+dy < y2*dy))
+  if dx==0 and dy==0: return
+  while (dx == 0 or x+dx != x2) and (dy == 0 or y+dy != y2):
+    x += dx
+    y += dy
+    yield (x,y,)
+
+def obstructed(board, x,y,dx,dy):
+  movepath = interpolate(x,y,x+dx,y+dy)
+  print("Checking for obstructions")
+  for x2,y2 in movepath:
+    print("checking {},{}".format(x2,y2))
+    if not isempty(board,x2,y2):
+      return getspace(board,x2,y2)
+  return False
+
+
 def game():
   board = build_board()
-  
+
+def getspace(board, x,y):
+  return board[y][x]
+
+def isempty(board, x,y):
+  return getspace(board, x,y) == EMPTY()
+
+
+def setspace(board, x,y, value):
+  board[y][x] = value
+  return board
+
 def move(board, x,y,dx,dy):
   if dx == 0 and dy == 0: raise Exc.InvalidMove()
   board = copy.deepcopy(board)
-  piece = board[y][x]
+  piece = getspace(board, x,y)
   print(piece)
   if not piece:
     raise Exc.InvalidMove()
 
-  occupy = board[y+dy][x+dx]
+  occupy = getspace(board,x+dx, y+dy)
 
   if occupy:
     friendly_collision = occupy.color == piece.color
@@ -61,17 +98,14 @@ def move(board, x,y,dx,dy):
     friendly_collision = False
     collision = False
 
-  new_piece, valid_move = piece.piece(dx,dy*((piece.color)*-2+1), friendly_collision,collision)
+  new_piece, valid_space = piece.piece(dx,dy*((piece.color)*-2+1), friendly_collision,collision)
 
+  valid_move = False if not valid_space else valid_space and not obstructed(board,x,y,dx,dy)
   if(valid_move):
     board[y][x] = EMPTY()
     p =  ColoredPiece(piece.color, new_piece)
     board[y+dy][x+dx] = p
-    return (board, valid_move)
-  else:
-    return (board, valid_move)
 
-
-
+  return (board, valid_move)
 
 
