@@ -65,7 +65,15 @@ class OnlineGame(Middleware):
         session.save_cookie(response, key=self.cookie_name)
         return response
 
-
+class VerifyUser(Middleware):
+    def __init__(self,cookie_name='user_id', secret_key=None):
+        self.cookie_name = cookie_name
+        self.secret_key = secret_key or os.urandom(20)
+    def request(self,next, request,cookie):
+        response = next()
+        cook = cookie.pop("user",None)
+        print(cook)
+        return response
 def move(rank,file,xto,yto):
     try:
         global board
@@ -112,7 +120,7 @@ routes = [
         ("/<path*>",default,render_basic)
         ]
 
-app = Application(routes,middlewares=[Cors(),SignedCookieMiddleware()])
+app = Application(routes,middlewares=[Cors(),SignedCookieMiddleware(), VerifyUser()])
 
 
 if __name__ == "__main__":
