@@ -41,6 +41,7 @@ def build_board():
   return board
 
 def interpolate(x,y,x2,y2,stepSize = 1):
+  print(x,y,x2,y2)
   stepSize = abs(int(stepSize))
   dx = x2 - x
   dx = 0 if dx == 0 else int(dx/abs(dx))
@@ -50,14 +51,15 @@ def interpolate(x,y,x2,y2,stepSize = 1):
   # print("Step Direction {},{}".format(dx,dy))
 
   # print("{}+{}<{}*{} == {}".format(y,dy,y2,dy, y+dy < y2*dy))
+  print("dx: {}, dy: {}".format(dx,dy))
   if dx==0 and dy==0: return
-  while (x+dx != x2) and (y+dy != y2):
+  while (x+dx != x2) or (y+dy != y2):
     x += dx
     y += dy
     yield (x,y,)
 
-def obstructed(board, x,y,dx,dy):
-  movepath = interpolate(x,y,x+dx,y+dy)
+def obstructed(board, interpolator, x,y,dx,dy):
+  movepath = interpolator(x,y,x+dx,y+dy)
   print("Checking for obstructions")
   for x2,y2 in movepath:
     print("checking {},{}".format(x2,y2))
@@ -80,7 +82,8 @@ def setspace(board, x,y, value):
   board[y][x] = value
   return board
 
-def move(board, x,y,dx,dy):
+def move(board, x,y,dx,dy, interpolators={Piece.knight: (lambda *args: ())}):
+  print('-'*20)
   if dx == 0 and dy == 0: raise Exc.InvalidMove()
   board = copy.deepcopy(board)
   piece = getspace(board, x,y)
@@ -98,8 +101,16 @@ def move(board, x,y,dx,dy):
     collision = False
 
   new_piece, valid_space = piece.piece(dx,dy*((piece.color)*-2+1), friendly_collision,collision)
+  try:
+    interpolator = interpolators[piece.piece]
+  except:
+    interpolator = interpolate
 
-  valid_move = False if not valid_space else valid_space and not obstructed(board,x,y,dx,dy)
+  print(interpolator)
+  is_obs = obstructed(board, interpolator, x,y,dx,dy)
+  valid_move = False if not valid_space else valid_space and not is_obs
+  print("valid move {}, {}".format(valid_move, is_obs))
+  print('-'*20)
   if(valid_move):
     board[y][x] = EMPTY()
     p =  ColoredPiece(piece.color, new_piece)
