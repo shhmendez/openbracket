@@ -51,7 +51,7 @@ def interpolate(x,y,x2,y2,stepSize = 1):
 
   # print("{}+{}<{}*{} == {}".format(y,dy,y2,dy, y+dy < y2*dy))
   if dx==0 and dy==0: return
-  while (dx == 0 or x+dx != x2) and (dy == 0 or y+dy != y2):
+  while (x+dx != x2) and (y+dy != y2):
     x += dx
     y += dy
     yield (x,y,)

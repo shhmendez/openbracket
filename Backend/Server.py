@@ -2,10 +2,10 @@ import sys,os
 
 from ..GameEngine import Game, exceptions as Exp
 import json
+
 from clastic import Application, render_basic, render_json, Response, Middleware
 from clastic.route import OPTIONS, POST
 from clastic.middleware.cookie import SignedCookieMiddleware
-from collections import Sized
 
 
 
@@ -37,7 +37,7 @@ def render_raw_json(context):
     res = json.dumps(context)
     return Response(res)
 class Cors(Middleware):
-    def request(self, next):
+    def request(self, next, request):
         res = next()
         if(type(res) != Response):
             try:
@@ -45,8 +45,13 @@ class Cors(Middleware):
             except:
                 pass
             res = Response(res)
-        res.headers['Access-Control-Allow-Origin'] = "*"
-        res.headers['Access-Control-Allow-Headers'] = "*"
+        
+
+        #find more specific implementation 
+        base_url = request.origin
+        res.headers['Access-Control-Allow-Origin'] = base_url
+        res.headers['Access-Control-Allow-Headers'] = "content-type"
+        res.headers['Access-Control-Allow-Credentials'] = 'true'
         return res
 
 class OnlineGame(Middleware):
@@ -70,11 +75,9 @@ def move(rank,file,xto,yto):
         dy = int(yto) - file
         print(rank,file,dx, dy)
         board,valid = Game.move(board, rank,file, dx, dy)
-        context = {'valid':valid}
+        return {'valid':valid}
     except Exp.InvalidMove:
-        context =  {'valid':False}
-    finally:
-        return Response(json.dumps(context), content_type='application/json') 
+        return {'valid':False}
 
 def newgame():
     global board
@@ -92,23 +95,24 @@ def sync():
     return places
 
 def getuser(cookie):
-    print(cookie)
-    cookie['user'] = 'cookie'
-    print(cookie)
+    cookie['user'] = '123456'
     return {"success":True}
 
 def default(request):
     return "success"
 
+def test(cookie):
+  print("here",cookie)
 routes = [
-        POST('/move', Post(move)),
+        POST('/move', Post(move), render_raw_json),
         POST("/sync",sync),
         POST("/newgame",newgame),
-        POST("/getuser",getuser,render_raw_json,middlewares=[SignedCookieMiddleware(secret_key='123')]),
+        POST("/getuser",getuser,render_raw_json),
+        POST("/test",test,render_raw),
         ("/<path*>",default,render_basic)
         ]
 
-app = Application(routes,middlewares=[Cors()])
+app = Application(routes,middlewares=[Cors(),SignedCookieMiddleware()])
 
 
 if __name__ == "__main__":
