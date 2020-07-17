@@ -15,7 +15,7 @@ class ColoredPiece(namedtuple('ColoredPiece',['color','piece'])):
   #temp for testing
   def __repr__(self):
     return self.__str__()
-
+  
 
 EMPTY = lambda: 0
 
