@@ -63,17 +63,18 @@ class OnlineGame(Middleware):
         session = load_cookie(request, self.cookie_name, self.secret_key)
         response = next(session=session)
         session.save_cookie(response, key=self.cookie_name)
-        return response
 
 class VerifyUser(Middleware):
     def __init__(self,cookie_name='user_id', secret_key=None):
         self.cookie_name = cookie_name
         self.secret_key = secret_key or os.urandom(20)
     def request(self,next, request,cookie):
+        cookie['user'] = 'itsme'
         response = next()
         cook = cookie.pop("user",None)
-        print(cook)
+        print("who: {}".format(cook))
         return response
+
 def move(rank,file,xto,yto):
     try:
         global board
@@ -102,25 +103,22 @@ def sync():
             places[str((i,j))] = {'name':str(piece), 'color': piece.color}
     return places
 
-def getuser(cookie):
-    cookie['user'] = '123456'
-    return {"success":True}
-
 def default(request):
     return "success"
 
 def test(cookie):
   print("here",cookie)
+  
 routes = [
         POST('/move', Post(move), render_raw_json),
         POST("/sync",sync),
         POST("/newgame",newgame),
-        POST("/getuser",getuser,render_raw_json),
+        POST("/getuser",default,render_raw_json),
         POST("/test",test,render_raw),
         ("/<path*>",default,render_basic)
         ]
 
-app = Application(routes,middlewares=[Cors(),SignedCookieMiddleware(), VerifyUser()])
+app = Application(routes,middlewares=[SignedCookieMiddleware(), VerifyUser(),Cors()])
 
 
 if __name__ == "__main__":
