@@ -1,7 +1,14 @@
 <template>
   
   <div id="app" ondragstart="return false">
-
+    <div class="login">
+      <input type="text" v-model="login.username">
+      <input type="text" v-model="login.password">
+      <button @click="submitLoginForm">login</button>
+    </div>
+    <div>
+      {{login}}
+    </div>
     <div class="board">
       <button @click="sync">sync</button>
       <button @click="newgame">new</button>
@@ -33,7 +40,8 @@ export default {
       selected: {},
       message: {},
       bodykeys: ["rank","file","xto","yto"],
-      board: {}
+      board: {},
+      login: {username:'', password:''},
     }
   },
   methods:{
@@ -90,7 +98,10 @@ export default {
       return this.basic_request('newgame',{}).then(()=>this.sync())
     },
     getuser(){
-      return this.basic_request('getuser',{})
+      return this.basic_request('getuser',{}).then(()=>console.log(document.cookie.split('?')))
+    },
+    submitLoginForm(){
+      return this.basic_request('login',this.login)
     },
     hash(rank,file){
       return rank*8+file

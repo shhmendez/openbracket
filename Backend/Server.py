@@ -1,7 +1,7 @@
 import sys,os
 
 from ..GameEngine import Game, exceptions as Exp
-from . import Users
+from . import UserSession
 import json
 
 from clastic import Application, render_basic, render_json, Response, Middleware
@@ -34,7 +34,6 @@ class Unpack(Middleware):
     def __init__(self,*params):
         self.params = params
         self.provides = tuple(self.params)
-        print(self.provides)
     def request(self,next,request):
         data = json.loads(request.data.decode("utf-8"))
         #add check for correct data shape
@@ -71,22 +70,27 @@ class OnlineGame(Middleware):
         response = next(session=session)
         session.save_cookie(response, key=self.cookie_name)
 
-class VerifyUser(Middleware):
-    def __init__(self,cookie_name='user_id', secret_key=None):
-        self.cookie_name = cookie_name
-        self.secret_key = secret_key or os.urandom(20)
-    def request(self,next, request,cookie):
-        cookie['user'] = 'itsme'
-        response = next()
-        # cook = cookie.pop("user",None)
-        for (k,v) in cookie.items():
-            response.set_cookie(k,v)
+#A cache here could help 
+class UserSession(Middleware):
+    provides = ('user_session',)
+    def __init__(self):
+        pass
+    def request(self,next, request,cookie): 
+        print(f'cookies in request {cookie}')
+        response = next({"user_session": {}})
+        print(cookie.items(),cook)
+        # for (k,v) in cookie.items():
+        #     response.set_cookie(k,v)
         
         # print("who: {}".format(cook))
         return response
 
+#this middleware should provide some set of functions that allow 
+class GameProvider(Middleware):
+    provides = ('boardgames')
 def login(username,password,cookie):
-    pass
+    cookie['username'] = username
+    return {'success': True, 'username':username}
 
 def move(rank,file,xto,yto):
     try:
@@ -102,7 +106,9 @@ def move(rank,file,xto,yto):
     except Exp.InvalidMove:
         return {'valid':False}
 
-def newgame():
+def getgames(Games):
+    return  
+def newgame(user_session):
     global board
     board = Game.build_board()
     return {"success":True}
@@ -134,7 +140,7 @@ routes = [
         ("/<path*>",default,render_basic)
         ]
 
-app = Application(routes,middlewares=[SignedCookieMiddleware(), VerifyUser(),Cors()])
+app = Application(routes,middlewares=[SignedCookieMiddleware(), UserSession(),Cors()])
 
 board = Game.build_board()
 if __name__ == "__main__":
