@@ -1,7 +1,7 @@
 import sys,os
 
-from ..GameEngine import Game, exceptions as Exp
-from . import UserSession
+from openbracket.GameEngine import Game, exceptions as Exp
+from openbracket.Backend import UserSession
 import json
 
 from clastic import Application, render_basic, render_json, Response, Middleware

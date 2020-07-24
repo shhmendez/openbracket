@@ -1,2 +1,2 @@
-cd ../../;
-{ find cache/Backend/ cache/GameEngine/; find cache -maxdepth 1 -type f; } | entr -rc python3 -Bm cache --test;
+cd ..; 
+find Backend GameEngine | grep -v __pycache__ | entr -rc nosetests
