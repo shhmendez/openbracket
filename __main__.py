@@ -26,5 +26,4 @@ sys.dont_write_bytecode = True
 #   print("done running Engine tests")
 #   print("="*40)
  
-if args.serve:
-  Server.app.serve(port=5000, use_reloader=False, use_meta=True, use_debugger=True)
+Server.app.serve(port=5000, use_reloader=False, use_meta=True, use_debugger=True)
