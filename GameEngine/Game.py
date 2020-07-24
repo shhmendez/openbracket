@@ -115,7 +115,8 @@ def move(board, x,y,dx,dy, interpolators={Piece.knight: (lambda *args: ())}):
     board[y][x] = EMPTY()
     p =  ColoredPiece(piece.color, new_piece)
     board[y+dy][x+dx] = p
-
+  else:
+    raise Exc.InvalidMove()
   return (board, valid_move)
 
 

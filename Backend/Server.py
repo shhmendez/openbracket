@@ -78,7 +78,7 @@ class UserSession(Middleware):
     def request(self,next, request,cookie): 
         print(f'cookies in request {cookie}')
         response = next({"user_session": {}})
-        print(cookie.items(),cook)
+        print(cookie.items())
         # for (k,v) in cookie.items():
         #     response.set_cookie(k,v)
         

@@ -1,7 +1,7 @@
 import sys,os
 sys.path.append(os.getcwd())
 
-import Game
+from .. import Game
 
 def printb(board):
   for p in board:
@@ -17,13 +17,10 @@ def moveboard(board):
 
   return inner
 board = Game.build_board()
-printb(board)
-print(Game.side('black'))
-print('-'*30)
-try:
-  Game.move(board,3,3,1,1)
-except:
-  print("Successful failure")
 
-move = moveboard(board)
+try:
+  Game.move(board,0,0,0,3)
+except:
+  print("Successfully failed to move")
+
 

@@ -1,26 +1,27 @@
+from mongoengine import *
 
-from types import SimpleNamespace
+connect('openbracket')
 
-#I'm doing everything in my power to avoid classes
+class User(Document):
+  name = StringField(required=True, max_length=200)
+  password = StringField(required=True, max_length=200)
 
-def wrapper():
-  funcs = {}
-  def namespace(func):
-    nonlocal funcs
-    funcs[func.__name__] = func
-    return func
-  
-  @namespace
-  def getuser(username, password):
-    return username
-
-
-  @namespace
-  def getgames(userid):
+class Board(Document):
+  def __init__(self):
     pass
 
-  return SimpleNamespace(**funcs)
 
+def verifyuser(Users,username, password):
+  return username
+def adduser(Users,username, password):
+  return username
 
-usersession = wrapper()
+def getgames(Games,userid):
+  pass
+
+def addgame(Games,userid):
+  pass
+
+def removegame(Games,userid, boardid):
+  pass
 
