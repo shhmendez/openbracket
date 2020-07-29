@@ -39,9 +39,11 @@ def build_board():
   board.extend([[EMPTY() for _ in range(8)] for _ in range(4)])
   board.extend(side((ColoredPiece.WHITE)))
   return board
-
+def print_board(board):
+  for row in board:
+    print(row)
 def interpolate(x,y,x2,y2,stepSize = 1):
-  print(x,y,x2,y2)
+  # print(x,y,x2,y2)
   stepSize = abs(int(stepSize))
   dx = x2 - x
   dx = 0 if dx == 0 else int(dx/abs(dx))
@@ -51,7 +53,7 @@ def interpolate(x,y,x2,y2,stepSize = 1):
   # print("Step Direction {},{}".format(dx,dy))
 
   # print("{}+{}<{}*{} == {}".format(y,dy,y2,dy, y+dy < y2*dy))
-  print("dx: {}, dy: {}".format(dx,dy))
+  # print("dx: {}, dy: {}".format(dx,dy))
   if dx==0 and dy==0: return
   while (x+dx != x2) or (y+dy != y2):
     x += dx
@@ -60,9 +62,9 @@ def interpolate(x,y,x2,y2,stepSize = 1):
 
 def obstructed(board, interpolator, x,y,dx,dy):
   movepath = interpolator(x,y,x+dx,y+dy)
-  print("Checking for obstructions")
+  # print("Checking for obstructions")
   for x2,y2 in movepath:
-    print("checking {},{}".format(x2,y2))
+    # print("checking {},{}".format(x2,y2))
     if not isempty(board,x2,y2):
       return getspace(board,x2,y2)
   return False
@@ -83,11 +85,11 @@ def setspace(board, x,y, value):
   return board
 
 def move(board, x,y,dx,dy, interpolators={Piece.knight: (lambda *args: ())}):
-  print('-'*20)
+  # print('-'*20)
   if dx == 0 and dy == 0: raise Exc.InvalidMove()
   board = copy.deepcopy(board)
   piece = getspace(board, x,y)
-  print(piece)
+  # print(piece)
   if not piece:
     raise Exc.InvalidMove()
 
@@ -106,11 +108,11 @@ def move(board, x,y,dx,dy, interpolators={Piece.knight: (lambda *args: ())}):
   except:
     interpolator = interpolate
 
-  print(interpolator)
+  # print(interpolator)
   is_obs = obstructed(board, interpolator, x,y,dx,dy)
   valid_move = False if not valid_space else valid_space and not is_obs
-  print("valid move {}, {}".format(valid_move, is_obs))
-  print('-'*20)
+  # print("valid move {}, {}".format(valid_move, is_obs))
+  # print('-'*20)
   if(valid_move):
     board[y][x] = EMPTY()
     p =  ColoredPiece(piece.color, new_piece)
