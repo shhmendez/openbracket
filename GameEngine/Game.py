@@ -1,5 +1,5 @@
 import sys,os
-
+import warnings
 from collections import namedtuple
 from . import Piece, exceptions as Exc
 import copy
@@ -119,6 +119,8 @@ def move(board, x,y,dx,dy, interpolators={Piece.knight: (lambda *args: ())}):
     board[y+dy][x+dx] = p
   else:
     raise Exc.InvalidMove()
-  return (board, valid_move)
+
+  warnings.warn("Returning `(board,valid_move)` is depreciated, move now returns `board`", DepreciationWarning)
+  return board
 
 
