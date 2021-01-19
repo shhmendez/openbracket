@@ -46,20 +46,24 @@ class Cors(Middleware):
         return res
 
 #A cache here could help 
+class Uncookie(Middleware):
+    def __init__(self,cookie_name):
+        pass
+    def request(self):
+        pass
 class UserSession(Middleware):
     provides = ('user',)
-    def __init__(self, User,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        self.User = User
-    def request(self,next, request,cookie): 
+    def request(self,next, user_model,request, cookie,username=None): 
         print(f'cookies in request {cookie}')
+        if not username:
+            username = cookie['username']
         #perform validation on usersession here
         #cookie is a map containing {username} 
         #it's safety is up to question
         #assuming a trustable cookie
         # username can be used to generate a `User` database object
          
-        response = next({"user": ""})
+        response = next({"user": user_model.objects(username=username)})
         # for (k,v) in cookie.items():
         #     response.set_cookie(k,v)
         
@@ -68,11 +72,8 @@ class UserSession(Middleware):
 
 class BoardProvider(Middleware):
     provides = ('board',)
-    def __init__(self, Board,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        self.Board = Board
-    def request(self,next,board_id):
-        board = self.Board.objects(_id=board_id)
+    def request(self,next,board_model,board_id):
+        board = board_model.objects(_id=board_id) 
         response = next(board=board)
         print(response)
         return response
